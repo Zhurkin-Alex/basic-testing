@@ -1,17 +1,33 @@
-// Uncomment the code below and write your tests
-/* import axios from 'axios';
-import { throttledGetDataFromApi } from './index'; */
+import axios, { AxiosInstance } from 'axios';
+import { throttledGetDataFromApi } from './index';
+
+jest.mock('axios');
 
 describe('throttledGetDataFromApi', () => {
-  test('should create instance with provided base url', async () => {
-    // Write your test here
+  beforeEach(() => {
+    jest.useFakeTimers(); // Enable fake timers
+  });
+
+  afterEach(() => {
+    jest.runOnlyPendingTimers(); // Run any remaining timers after each test
+    jest.useRealTimers(); // Restore real timers
   });
 
   test('should perform request to correct provided url', async () => {
-    // Write your test here
-  });
+    const mockAxiosClient = {
+      get: jest.fn().mockResolvedValue({ data: 'test data' }),
+    };
 
-  test('should return response data', async () => {
-    // Write your test here
+    jest
+      .spyOn(axios, 'create')
+      .mockReturnValue(mockAxiosClient as unknown as AxiosInstance);
+
+    const promise = throttledGetDataFromApi('/posts');
+
+    jest.runAllTimers(); // Execute the throttled function immediately
+
+    await promise;
+
+    expect(mockAxiosClient.get).toHaveBeenCalledWith('/posts');
   });
 });
